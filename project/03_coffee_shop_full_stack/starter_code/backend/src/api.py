@@ -19,7 +19,7 @@ CORS(app)
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 !! Running this funciton will add one
 """
-# db_drop_and_create_all()
+db_drop_and_create_all()
 
 # ROUTES
 """
@@ -41,7 +41,7 @@ def get_drinks(token):
         if drink:
             drinks = [drinks.short() for drinks in drink]
 
-            return jsonify({"success": True, "drinks": drinks}), 200
+            return jsonify({"success": True, "drinks":drinks}), 200
         else:
             abort(404)
     except:
@@ -107,7 +107,7 @@ def create_drinks(token):
                 new_drink = Drink(title=req_title, recipe=json.dumps(req_recipe))
                 new_drink.insert()
 
-            return jsonify({"success": True, "drinks": new_drink.long()}), 200
+            return jsonify({"success": True, "drinks":[new_drink.long()]}), 200
         else:
             return (jsonify({"success": False, "Description": "please fill all"}), 422)
     except:
@@ -137,12 +137,21 @@ def update_drinks(token, id):
         drink = Drink.query.filter(Drink.id == id).one_or_none()
         if drink:
                 
-            if title or recipe:
+            if title:
+                drink.title = title
+                drink.update()
+                return jsonify({"success": True, "drinks": [drink.long()]}), 200
+            if recipe:
+                   
+                drink.recipe = json.dumps(recipe)
+                drink.update()
+                return jsonify({"success": True, "drinks": [drink.long()]}), 200
+            if title and recipe:
                 drink.title = title
                 drink.recipe = json.dumps(recipe)
 
                 drink.update()
-                return jsonify({"success": True, "drinks": drink.long()}), 200
+                return jsonify({"success": True, "drinks": [drink.long()]}), 200
             else:
                 abort(400)
         else:
